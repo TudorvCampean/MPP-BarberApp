@@ -1,0 +1,33 @@
+{
+    "$schema": "https://www.schemastore.org/package.json",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "vite build",
+        "dev": "vite",
+        "e2e": "playwright test",
+        "e2e:headed": "playwright test --headed",
+        "test": "vitest",
+        "coverage": "vitest run --coverage"
+    },
+    "devDependencies": {
+        "@tailwindcss/vite": "^4.0.0",
+        "@playwright/test": "^1.54.2",
+        "@vitest/coverage-v8": "^4.1.0",
+        "@vue/test-utils": "^2.4.6",
+        "autoprefixer": "^10.4.27",
+        "axios": "^1.11.0",
+        "concurrently": "^9.0.1",
+        "jsdom": "^29.0.1",
+        "laravel-vite-plugin": "^3.0.0",
+        "postcss": "^8.5.8",
+        "tailwindcss": "^3.4.1",
+        "vite": "^8.0.0",
+        "vitest": "^4.1.0"
+    },
+    "dependencies": {
+        "@vitejs/plugin-vue": "^6.0.5",
+        "lucide-vue-next": "^0.577.0",
+        "vue": "^3.5.30"
+    }
+}
