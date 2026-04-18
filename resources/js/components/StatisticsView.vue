@@ -176,9 +176,9 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { Home, TrendingUp, DollarSign, Users, Calendar, BarChart2 } from 'lucide-vue-next';
-import { appointments } from '../domain/appointmentStore';
+import { appointments, loadAllAppointments } from '../domain/appointmentStore';
 
 defineEmits(['navigate']);
 
@@ -327,6 +327,10 @@ const monthlyGrowthData = computed(() => {
     const maxClients = Math.max(...monthlyData.map(d => d.clients), 1);
 
     return { data: monthlyData, maxClients };
+});
+
+onMounted(async () => {
+    await loadAllAppointments();
 });
 </script>
 
