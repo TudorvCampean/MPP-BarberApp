@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import { describe, it, expect } from 'vitest';
+import { beforeEach, describe, it, expect } from 'vitest';
 
 import MainApp from '../MainApp.vue';
 import PresentationView from '../PresentationView.vue';
@@ -7,7 +7,20 @@ import LoginView from '../LoginView.vue';
 import TableView from '../TableView.vue';
 import StatisticsView from '../StatisticsView.vue';
 
+const clearCookies = () => {
+    const cookies = document.cookie ? document.cookie.split(';') : [];
+
+    for (const cookie of cookies) {
+        const name = cookie.split('=')[0].trim();
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+    }
+};
+
 describe('MainApp.vue - Routing Logic', () => {
+    beforeEach(() => {
+        clearCookies();
+    });
+
     it('1. Renders PresentationView by default on startup', () => {
         const wrapper = mount(MainApp);
 

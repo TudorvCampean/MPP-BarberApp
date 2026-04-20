@@ -530,13 +530,14 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { Home, Scissors, BarChart3, Calendar as CalendarIcon, LayoutGrid, Table as TableIcon, Plus, Eye, Pencil, Trash2, X, Clock, ChevronLeft, ChevronRight, Search, CheckCircle, Check, Users, ChevronDown, Banknote, Undo } from 'lucide-vue-next';
 import {
     appointments,
     addAppointment,
     updateAppointment,
     deleteAppointmentById,
+    loadAllAppointments,
 } from '../domain/appointmentStore';
 import { validateAppointment } from '../domain/appointmentModel';
 import { readBrowserState, recordBrowserEvent } from '../domain/browserState';
@@ -607,7 +608,7 @@ const openEditModal = (apt) => {
     isFormOpen.value = true;
 };
 
-const saveApt = () => {
+const saveApt = async () => {
     const formattedTime = `${String(form.value.hour).padStart(2, '0')}:${String(form.value.minute).padStart(2, '0')}`;
     form.value.time = formattedTime;
 
@@ -630,8 +631,8 @@ const saveApt = () => {
     }
 
     const success = form.value.id
-        ? updateAppointment(form.value)
-        : addAppointment(form.value);
+        ? await updateAppointment(form.value)
+        : await addAppointment(form.value);
 
     if (success) {
         recordBrowserEvent(form.value.id ? 'appointment_updated' : 'appointment_created', form.value.clientName, {
@@ -652,13 +653,16 @@ const confirmDeleteApt = (apt) => {
     deleteModalOpen.value = true;
 };
 
-const executeDelete = () => {
+const executeDelete = async () => {
     if (!appointmentToDelete.value) return;
 
     recordBrowserEvent('appointment_deleted', appointmentToDelete.value.clientName, {
         appointmentId: appointmentToDelete.value.id,
     });
-    deleteAppointmentById(appointmentToDelete.value.id);
+    const deleted = await deleteAppointmentById(appointmentToDelete.value.id);
+    if (!deleted) {
+        return;
+    }
     deleteModalOpen.value = false;
     appointmentToDelete.value = null;
 
@@ -682,13 +686,13 @@ const openCompleteModal = (apt) => {
 };
 
 // NOU: Executa salvarea statusului completed impreuna cu venitul
-const executeComplete = () => {
+const executeComplete = async () => {
     if (!appointmentToComplete.value || (!incomeAmount.value && incomeAmount.value !== 0)) return;
 
     appointmentToComplete.value.status = 'completed';
     appointmentToComplete.value.income = Number(incomeAmount.value);
 
-    updateAppointment(appointmentToComplete.value);
+    await updateAppointment(appointmentToComplete.value);
     recordBrowserEvent('appointment_completed', appointmentToComplete.value.clientName, {
         appointmentId: appointmentToComplete.value.id,
         income: Number(incomeAmount.value),
@@ -699,14 +703,18 @@ const executeComplete = () => {
 };
 
 // NOU: Revert reseteaza statusul si curata venitul
-const revertApt = (apt) => {
+const revertApt = async (apt) => {
     apt.status = 'upcoming';
     apt.income = null;
-    updateAppointment(apt);
+    await updateAppointment(apt);
     recordBrowserEvent('appointment_reverted', apt.clientName, {
         appointmentId: apt.id,
     });
 };
+
+onMounted(async () => {
+    await loadAllAppointments();
+});
 
 // --- FORMATTING & STATS ---
 const formatDate = (dateStr) => {
