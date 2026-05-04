@@ -5,11 +5,16 @@ import { validateAppointment } from './appointmentModel';
 // the hosting entrypoint can set `window.__API_BASE__` (see `src/main.js`). If present, build an
 // absolute API base like `${window.__API_BASE__}/api/appointments`. Otherwise fall back to the
 // relative path which targets the same origin (`/api/appointments`).
-let API_BASE = '/api/appointments';
-if (typeof window !== 'undefined' && window.__API_BASE__) {
-    const origin = String(window.__API_BASE__).replace(/\/$/, '');
-    API_BASE = `${origin}/api/appointments`;
-}
+//
+// NOTE: This is evaluated lazily (at call time) because main.js sets window.__API_BASE__
+// AFTER importing this module, so a top-level check would always see undefined.
+const getApiBase = () => {
+    if (typeof window !== 'undefined' && window.__API_BASE__) {
+        const origin = String(window.__API_BASE__).replace(/\/$/, '');
+        return `${origin}/api/appointments`;
+    }
+    return '/api/appointments';
+};
 const DEFAULT_PER_PAGE = 100;
 
 export const appointments = ref([]);
@@ -63,7 +68,7 @@ const safeJson = async (response) => {
 };
 
 const request = async (path = '', options = {}) => {
-    const response = await fetch(`${API_BASE}${path}`, {
+    const response = await fetch(`${getApiBase()}${path}`, {
         method: options.method || 'GET',
         headers: {
             Accept: 'application/json',
