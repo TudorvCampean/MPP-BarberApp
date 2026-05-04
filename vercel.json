@@ -1,11 +1,5 @@
 {
-  "buildCommand": "bash vercel-build.sh",
-  "outputDirectory": "Frontend-Vercel/dist",
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
-  ]
+  "buildCommand": "npm --prefix Frontend-Vercel install && npm --prefix Frontend-Vercel run build",
+  "outputDirectory": "Frontend-Vercel/dist"
 }
 
