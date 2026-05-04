@@ -1,20 +1,23 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const baseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://mpp-barberapp.test';
-const useInternalServer = process.env.PLAYWRIGHT_USE_INTERNAL_SERVER === '1';
 
 export default defineConfig({
     testDir: './tests/e2e',
-    fullyParallel: true,
+    // E2E tests share one in-memory backend state, so run sequentially for stability.
+    fullyParallel: false,
     forbidOnly: !!process.env.CI,
     retries: process.env.CI ? 2 : 0,
-    workers: process.env.CI ? 1 : undefined,
+    workers: 1,
     reporter: [['list']],
     use: {
         baseURL,
         trace: 'on-first-retry',
         screenshot: 'only-on-failure',
         video: 'retain-on-failure',
+        extraHTTPHeaders: {
+            'X-E2E-Isolated': '1',
+        },
     },
     projects: [
         {
@@ -30,15 +33,5 @@ export default defineConfig({
             use: { ...devices['Desktop Safari'] },
         },
     ],
-    ...(useInternalServer
-        ? {
-            webServer: {
-                command: 'npm run build && php artisan serve --host 127.0.0.1 --port 8000',
-                url: 'http://127.0.0.1:8000',
-                reuseExistingServer: !process.env.CI,
-                timeout: 120000,
-            },
-        }
-        : {}),
 });
 

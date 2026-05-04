@@ -22,6 +22,14 @@ const nextDateInputValue = () => {
 };
 
 test.describe('Elite Cuts browser flows', () => {
+    test.beforeEach(async ({ page }) => {
+        await page.request.get('/api/testing/reset-appointments');
+    });
+
+    test.afterEach(async ({ page }) => {
+        await page.request.get('/api/testing/reset-appointments');
+    });
+
     test('restores the last visited page from cookies after reload', async ({ page }) => {
         await page.goto('/');
 
@@ -55,22 +63,33 @@ test.describe('Elite Cuts browser flows', () => {
         await expect(page.getByTestId('table-view-cards')).toHaveClass(/bg-slate-800/);
     });
 
-    test('tracks appointment creation and allows navigating to statistics and home', async ({ page }) => {
+    test('tracks appointment creation and allows navigating to statistics and home', async ({ page }, testInfo) => {
+        const browserHourByProject = {
+            chromium: '10',
+            firefox: '11',
+            webkit: '12',
+        };
+        const uniqueHour = browserHourByProject[testInfo.project.name] ?? '10';
+        const uniqueClientName = `Playwright Client ${testInfo.project.name}`;
+
         await page.goto('/');
         await page.getByTestId('presentation-open-calendar').click();
 
         await page.getByTestId('table-add-appointment').click();
-        await page.getByTestId('appointment-client-name').fill('Playwright Client');
+        await page.getByTestId('appointment-client-name').fill(uniqueClientName);
         await page.getByTestId('appointment-date').fill(nextDateInputValue());
-        await page.getByTestId('appointment-hour').selectOption('10');
+        await page.getByTestId('appointment-hour').selectOption(uniqueHour);
         await page.getByTestId('appointment-minute').selectOption('30');
         await page.getByTestId('appointment-save').click();
-
-        await expect(page.getByTestId('appointment-save')).toBeHidden();
+        await expect.poll(async () => (await getBrowserState(page))?.lastAction, { timeout: 15000 }).toBe('appointment_created');
 
         const stateAfterCreate = await getBrowserState(page);
         expect(stateAfterCreate?.lastAction).toBe('appointment_created');
-        expect(stateAfterCreate?.lastActionValue).toBe('Playwright Client');
+        expect(stateAfterCreate?.lastActionValue).toBe(uniqueClientName);
+
+        if (await page.getByTestId('appointment-save').isVisible()) {
+            await page.getByTestId('appointment-cancel').click();
+        }
 
         await page.getByTestId('table-statistics').click();
         await expect(page.getByText('Insights')).toBeVisible();
@@ -85,6 +104,51 @@ test.describe('Elite Cuts browser flows', () => {
         const finalState = await getBrowserState(page);
         expect(finalState?.lastPage).toBe('table');
     });
+
+    test('completes and reverts an appointment from the table', async ({ page }, testInfo) => {
+        const browserHourByProject = {
+            chromium: '17',
+            firefox: '18',
+            webkit: '19',
+        };
+        const uniqueHour = browserHourByProject[testInfo.project.name] ?? '17';
+        const uniqueClientName = `Completion Client ${testInfo.project.name}`;
+
+        await page.goto('/');
+        await page.getByTestId('presentation-open-calendar').click();
+
+        await page.getByTestId('table-add-appointment').click();
+        await page.getByTestId('appointment-client-name').fill(uniqueClientName);
+        await page.getByTestId('appointment-date').fill(nextDateInputValue());
+        await page.getByTestId('appointment-hour').selectOption(uniqueHour);
+        await page.getByTestId('appointment-minute').selectOption('55');
+        await page.getByTestId('appointment-save').click();
+        await expect.poll(async () => (await getBrowserState(page))?.lastAction, { timeout: 15000 }).toBe('appointment_created');
+
+        if (await page.getByTestId('appointment-save').isVisible()) {
+            await page.getByTestId('appointment-cancel').click();
+        }
+
+        const row = page.locator('tr', { hasText: uniqueClientName });
+        await expect(row).toBeVisible();
+
+        await row.hover();
+        await row.locator('button[title="Mark as Completed"]').click({ force: true });
+        await expect(page.getByTestId('complete-confirm')).toBeVisible();
+
+        await page.locator('input[placeholder="e.g. 50"]').fill('75');
+        await page.getByTestId('complete-confirm').click();
+
+        await expect(row.getByText('Completed')).toBeVisible();
+        await expect.poll(async () => (await getBrowserState(page))?.lastAction, { timeout: 15000 }).toBe('appointment_completed');
+
+        await row.hover();
+        await row.locator('button[title="Revert to Upcoming"]').click({ force: true });
+
+        await expect(row.getByText('Upcoming')).toBeVisible();
+        await expect.poll(async () => (await getBrowserState(page))?.lastAction, { timeout: 15000 }).toBe('appointment_reverted');
+    });
+
 
     test('allows choosing a specific month in statistics', async ({ page }) => {
         await page.goto('/');

@@ -2,17 +2,14 @@
 
 namespace Tests\Feature\Api;
 
-use App\Domain\Appointments\Contracts\AppointmentRepositoryInterface;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class AppointmentApiTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        app(AppointmentRepositoryInterface::class)->reset();
-    }
+    // RefreshDatabase wraps every test in a transaction (or re-migrates),
+    // giving each test a clean, isolated database without touching real data.
+    use RefreshDatabase;
 
     public function test_it_creates_and_shows_an_appointment(): void
     {
@@ -90,6 +87,27 @@ class AppointmentApiTest extends TestCase
 
         $this->deleteJson('/api/appointments/'.$id)->assertNoContent();
         $this->getJson('/api/appointments/'.$id)->assertNotFound();
+    }
+
+    public function test_it_can_complete_a_historical_appointment(): void
+    {
+        $created = $this->postJson('/api/appointments', [
+            'client_name' => 'History Client',
+            'date' => '2026-01-11',
+            'time' => '10:00',
+            'status' => 'upcoming',
+            'income' => null,
+        ])->assertCreated();
+
+        $id = $created->json('data.id');
+
+        $this->putJson('/api/appointments/'.$id, [
+            'status' => 'completed',
+            'income' => 75,
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.status', 'completed')
+            ->assertJsonPath('data.income', 75);
     }
 
     public function test_it_returns_404_for_unknown_appointment(): void

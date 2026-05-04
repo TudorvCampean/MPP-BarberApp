@@ -1,5 +1,6 @@
 <?php
 
+use App\Domain\Appointments\Contracts\AppointmentRepositoryInterface;
 use App\Http\Controllers\Api\AppointmentController;
 use Illuminate\Support\Facades\Route;
 
@@ -12,4 +13,12 @@ Route::prefix('appointments')->group(function (): void {
     Route::patch('/{id}', [AppointmentController::class, 'update'])->whereNumber('id');
     Route::delete('/{id}', [AppointmentController::class, 'destroy'])->whereNumber('id');
 });
+
+if (app()->environment(['local', 'testing'])) {
+    Route::get('/testing/reset-appointments', function () {
+        app(AppointmentRepositoryInterface::class)->reset();
+
+        return response()->json(['ok' => true]);
+    });
+}
 
