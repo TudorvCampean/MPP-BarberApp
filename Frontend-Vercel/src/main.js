@@ -5,6 +5,6 @@ import './style.css';
 // Poți seta URL-ul de bază pentru axios aici, ca să nu îl schimbi în fiecare componentă.
 import axios from 'axios';
 // IMPORTANT: Înlocuiește acest link cu cel generat de `herd share` când ești gata de prezentare!
-axios.defaults.baseURL = 'https://8jqhcu9mke.sharedwithexpose.com';
+axios.defaults.baseURL = 'https://6zcejiynpx.sharedwithexpose.com';
 
 createApp(MainApp).mount('#app');
