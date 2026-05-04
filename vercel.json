@@ -1,7 +1,6 @@
 {
-  "root": "Frontend-Vercel",
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
+  "buildCommand": "bash vercel-build.sh",
+  "outputDirectory": "Frontend-Vercel/dist",
   "rewrites": [
     {
       "source": "/(.*)",
