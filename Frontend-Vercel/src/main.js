@@ -1,5 +1,6 @@
 import { createApp } from 'vue';
 import MainApp from './components/MainApp.vue';
+import './style.css';
 
 // Poți seta URL-ul de bază pentru axios aici, ca să nu îl schimbi în fiecare componentă.
 import axios from 'axios';
