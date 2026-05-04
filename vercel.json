@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd Frontend-Vercel && npm install && npm run build",
+  "buildCommand": "npm install --prefix Frontend-Vercel && npm run build --prefix Frontend-Vercel",
   "outputDirectory": "Frontend-Vercel/dist",
   "rewrites": [
     {
