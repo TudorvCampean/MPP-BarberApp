@@ -1,0 +1,11 @@
+{
+  "buildCommand": "cd Frontend-Vercel && npm install && npm run build",
+  "outputDirectory": "Frontend-Vercel/dist",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
+
