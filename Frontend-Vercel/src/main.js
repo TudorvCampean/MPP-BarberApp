@@ -4,7 +4,7 @@ import './style.css';
 
 import axios from 'axios';
 // Set this to the current `herd share MPP-BarberApp` URL before each presentation.
-axios.defaults.baseURL = 'https://jveoxcchup.sharedwithexpose.com';
+axios.defaults.baseURL = 'https://7nhehw6n40.sharedwithexpose.com';
 if (typeof window !== 'undefined') {
 	window.__API_BASE__ = axios.defaults.baseURL;
 }
