@@ -6,36 +6,31 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Explicitly attach CORS headers to every API response.
- *
- * This middleware is intentionally simple and hard-codes permissive CORS
- * settings suited for a university demo where the frontend is hosted on
- * Vercel and the backend is tunnelled through `herd share` (expose.com).
- *
- * For OPTIONS preflight requests the middleware short-circuits the pipeline
- * and returns a 200 immediately with the required headers — no route match
- * is needed, which avoids the 404 / 405 that browsers interpret as a CORS
- * failure.
- */
 class ForceApiCors
 {
     public function handle(Request $request, Closure $next): Response
     {
-        // Short-circuit preflight requests before they reach routing.
+        // Păcălim browserul spunându-i că permitem exact adresa de pe care vine el, nu "*"
+        $origin = $request->header('Origin') ?: '*';
+
+        // Am adăugat 'ngrok-skip-browser-warning' în lista de headere permise!
+        $allowedHeaders = 'Content-Type, Authorization, Accept, X-Requested-With, ngrok-skip-browser-warning';
+
         if ($request->isMethod('OPTIONS')) {
             return response('', 200)
-                ->header('Access-Control-Allow-Origin', '*')
+                ->header('Access-Control-Allow-Origin', $origin)
                 ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS')
-                ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept, X-Requested-With');
+                ->header('Access-Control-Allow-Headers', $allowedHeaders)
+                ->header('Access-Control-Allow-Credentials', 'true');
         }
 
         /** @var Response $response */
         $response = $next($request);
 
-        $response->headers->set('Access-Control-Allow-Origin', '*');
+        $response->headers->set('Access-Control-Allow-Origin', $origin);
         $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept, X-Requested-With');
+        $response->headers->set('Access-Control-Allow-Headers', $allowedHeaders);
+        $response->headers->set('Access-Control-Allow-Credentials', 'true');
 
         return $response;
     }
