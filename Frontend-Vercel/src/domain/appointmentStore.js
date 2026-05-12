@@ -91,18 +91,6 @@ const request = async (path = '', options = {}) => {
     return payload;
 };
 
-    const payload = await safeJson(response);
-
-    if (!response.ok) {
-        const error = new Error('API request failed');
-        error.status = response.status;
-        error.payload = payload;
-        throw error;
-    }
-
-    return payload;
-};
-
 const fetchAllPages = async () => {
     let page = 1;
     let lastPage = 1;
