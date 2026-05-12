@@ -1,13 +1,6 @@
 import { ref } from 'vue';
 import { validateAppointment } from './appointmentModel';
 
-// If the app is deployed somewhere but needs to talk to a tunneled/local backend (e.g. herd share),
-// the hosting entrypoint can set `window.__API_BASE__` (see `src/main.js`). If present, build an
-// absolute API base like `${window.__API_BASE__}/api/appointments`. Otherwise fall back to the
-// relative path which targets the same origin (`/api/appointments`).
-//
-// NOTE: This is evaluated lazily (at call time) because main.js sets window.__API_BASE__
-// AFTER importing this module, so a top-level check would always see undefined.
 const getApiBase = () => {
     if (typeof window !== 'undefined' && window.__API_BASE__) {
         const origin = String(window.__API_BASE__).replace(/\/$/, '');
@@ -66,17 +59,29 @@ const safeJson = async (response) => {
         return null;
     }
 };
-
 const request = async (path = '', options = {}) => {
+    // 1. Citim token-ul AICI, la fiecare cerere, pentru a fi siguri că e cel actual
+    const token = localStorage.getItem('auth_token');
+
     const response = await fetch(`${getApiBase()}${path}`, {
         method: options.method || 'GET',
         headers: {
-            Accept: 'application/json',
+            'Authorization': `Bearer ${token}`, // Formatul cerut pentru Assignment 4
+            'Accept': 'application/json',
             'Content-Type': 'application/json',
             ...(options.headers || {}),
         },
+        // 2. IMPORTANT: Adaugă body-ul, altfel POST/PUT nu vor trimite date!
         body: options.body,
     });
+
+    // 3. Gestionarea Sesiunii (Inactivitate/Expirare Token)
+    if (response.status === 401) {
+        localStorage.removeItem('auth_token');
+        // Redirecționare la login dacă token-ul nu mai e valid
+        window.location.href = '/login';
+        throw new Error('Session expired');
+    }
 
     const payload = await safeJson(response);
 

@@ -14,26 +14,20 @@
 
                 <div class="text-center mb-8">
                     <h1 class="text-3xl font-bold text-white mb-2">Elite Cuts</h1>
-                    <p class="text-slate-400">
-                        {{ isLogin ? "Sign in to your account" : "Create new account" }}
-                    </p>
+                    <p class="text-slate-400">Sign in to your account</p>
                 </div>
 
-                <form @submit.prevent="handleSubmit" class="space-y-6">
-                    <div class="space-y-4">
+                <div v-if="authError" class="mb-6 p-3 rounded bg-red-500/10 border border-red-500/50 text-red-500 text-sm text-center">
+                    {{ authError }}
+                </div>
 
+                <form @submit.prevent="handleLoginSubmit" class="space-y-6">
+                    <div class="space-y-4">
                         <div>
                             <label for="email" class="text-slate-300 mb-2 block text-sm font-medium">Email</label>
                             <div class="relative">
                                 <Mail class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-                                <input
-                                    id="email"
-                                    type="email"
-                                    v-model="email"
-                                    placeholder="barber@elitecuts.ro"
-                                    class="flex h-10 w-full rounded-md bg-slate-900 border border-slate-700 text-white pl-11 px-3 py-2 text-sm placeholder:text-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
-                                    required
-                                />
+                                <input id="email" v-model="email" type="email" placeholder="barber@elitecuts.ro" class="input-field" required />
                             </div>
                         </div>
 
@@ -41,39 +35,26 @@
                             <label for="password" class="text-slate-300 mb-2 block text-sm font-medium">Password</label>
                             <div class="relative">
                                 <Lock class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-                                <input
-                                    id="password"
-                                    type="password"
-                                    v-model="password"
-                                    placeholder="••••••••"
-                                    class="flex h-10 w-full rounded-md bg-slate-900 border border-slate-700 text-white pl-11 px-3 py-2 text-sm placeholder:text-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
-                                    required
-                                />
+                                <input id="password" v-model="password" type="password" placeholder="••••••••" class="input-field" required />
                             </div>
                         </div>
                     </div>
 
                     <button
                         type="submit"
-                        data-testid="login-submit"
-                        class="w-full inline-flex items-center justify-center rounded-md text-sm transition-colors focus-visible:outline-none disabled:opacity-50 bg-amber-500 hover:bg-amber-600 text-slate-900 font-semibold py-3"
+                        :disabled="isLoading"
+                        class="w-full inline-flex items-center justify-center rounded-md bg-amber-500 hover:bg-amber-600 text-slate-900 font-semibold py-3 disabled:opacity-50 transition-colors"
                     >
-                        {{ isLogin ? "Sign In" : "Create Account" }}
+                        {{ isLoading ? "Processing..." : "Sign In" }}
                     </button>
 
                     <div class="text-center">
                         <button
                             type="button"
-                            @click="isLogin = !isLogin"
-                            data-testid="login-toggle-mode"
+                            @click="$emit('navigate', 'register')"
                             class="text-slate-400 hover:text-amber-500 transition-colors text-sm focus:outline-none"
                         >
-                            <template v-if="isLogin">
-                                Don't have an account? <span class="text-amber-500 font-semibold">Register</span>
-                            </template>
-                            <template v-else>
-                                Already have an account? <span class="text-amber-500 font-semibold">Sign In</span>
-                            </template>
+                            Don't have an account? <span class="text-amber-500 font-semibold">Register</span>
                         </button>
                     </div>
                 </form>
@@ -87,12 +68,10 @@
                 <button
                     type="button"
                     @click="$emit('navigate', 'table')"
-                    data-testid="login-continue-guest"
-                    class="w-full inline-flex items-center justify-center rounded-md text-sm transition-colors border border-slate-700 text-slate-300 hover:bg-slate-700 py-3 font-medium"
+                    class="w-full border border-slate-700 text-slate-300 hover:bg-slate-700 py-3 rounded-md text-sm font-medium"
                 >
                     Continue as Guest
                 </button>
-
             </div>
         </div>
     </div>
@@ -100,18 +79,26 @@
 
 <script setup>
 import { ref } from 'vue';
-
 import { Scissors, Mail, Lock } from 'lucide-vue-next';
+import { login, authError, isLoading } from '../domain/authStore'; // Am scos 'register' de aici
 
 const emit = defineEmits(['navigate']);
 
-
-const isLogin = ref(true);
 const email = ref('');
 const password = ref('');
 
-
-const handleSubmit = () => {
-    emit('navigate', 'table');
+const handleLoginSubmit = async () => {
+    // Apelăm funcția de login din authStore
+    const success = await login(email.value, password.value);
+    if (success) {
+        // Doar dacă login-ul a reușit, navigăm la tabel
+        emit('navigate', 'table');
+    }
 };
 </script>
+
+<style scoped>
+.input-field {
+    @apply flex h-10 w-full rounded-md bg-slate-900 border border-slate-700 text-white pl-11 px-3 py-2 text-sm placeholder:text-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500;
+}
+</style>

@@ -6,7 +6,10 @@ import {
     loadAllAppointments,
     updateAppointment,
 } from '../../domain/appointmentStore';
-
+beforeEach(() => {
+    localStorage.setItem('auth_token', 'test-token'); // Adaugă un token fictiv pentru teste
+    vi.clearAllMocks();
+});
 const mockFetchResponse = (payload, ok = true, status = 200) => ({
     ok,
     status,
@@ -178,5 +181,22 @@ describe('appointmentStore.js - API-backed repository', () => {
         expect(loaded).toBe(true);
         expect(appointments.value).toHaveLength(2);
         expect(appointments.value[1].clientName).toBe('B');
+    });
+    it('logs out and redirects when receiving a 401 Unauthorized', async () => {
+        // Simulăm un token expirat (401)
+        global.fetch = vi.fn().mockResolvedValue(mockFetchResponse({ message: 'Unauthorized' }, false, 401));
+
+        // Mock-uim window.location pentru a nu da eroare în test
+        delete window.location;
+        window.location = { href: vi.fn() };
+
+        try {
+            await loadAllAppointments();
+        } catch (e) {
+            // Ne așteptăm să arunce eroarea "Session expired" definită în request
+        }
+
+        expect(localStorage.getItem('auth_token')).toBeNull();
+        expect(window.location.href).toBe('/login');
     });
 });

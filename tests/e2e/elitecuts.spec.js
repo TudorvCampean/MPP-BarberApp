@@ -1,5 +1,19 @@
 import { expect, test } from '@playwright/test';
 
+test.beforeEach(async ({ page }) => {
+    // Mergem la pagina principală
+    await page.goto('/');
+
+    // Dacă vedem butonul de login, înseamnă că trebuie să ne autentificăm
+    // Asigură-te că folosești test-id-urile sau label-urile tale
+    await page.fill('input[type="email"]', 'test@test.ro');
+    await page.fill('input[type="password"]', 'parola123');
+    await page.click('button[type="submit"]');
+
+    // Așteptăm să apară tabelul pentru a confirma că login-ul a reușit
+    await expect(page.getByTestId('appointments-table')).toBeVisible();
+});
+
 const COOKIE_NAME = 'elitecuts_browser_state_v1';
 
 const getBrowserState = async (page) => {

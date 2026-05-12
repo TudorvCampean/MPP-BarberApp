@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Api;
 
+use App\Models\User; // IMPORT NOU: Necesar pentru a găsi modelul de User
+use Laravel\Sanctum\Sanctum; //
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -10,6 +12,18 @@ class AppointmentApiTest extends TestCase
     // RefreshDatabase wraps every test in a transaction (or re-migrates),
     // giving each test a clean, isolated database without touching real data.
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // 1. Creăm un utilizator de test
+        $user = User::factory()->create();
+
+        // 2. Acționăm ca acest utilizator pentru TOATE testele din acest fișier
+        // Aceasta este "cheia" care deschide rutele protejate în Assignment 4
+        Sanctum::actingAs($user);
+    }
 
     public function test_it_creates_and_shows_an_appointment(): void
     {
