@@ -12,8 +12,7 @@ import axios from 'axios';
 //
 // Falls back to localhost so pure-local dev still works without any .env file.
 // ---------------------------------------------------------------------------
-const apiBase = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000';
-
+const apiBase = 'http://192.168.56.1:8080';
 axios.defaults.baseURL = apiBase;
 if (typeof window !== 'undefined') {
     window.__API_BASE__ = apiBase;

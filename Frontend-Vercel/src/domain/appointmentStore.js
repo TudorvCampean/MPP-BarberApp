@@ -73,7 +73,6 @@ const request = async (path = '', options = {}) => {
         headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
-            'ngrok-skip-browser-warning': 'true', // <-- AICI ESTE PERMISUL VIP PENTRU NGROK
             ...(options.headers || {}),
         },
         body: options.body,

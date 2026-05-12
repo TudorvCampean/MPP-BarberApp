@@ -21,7 +21,7 @@ return [
     */
 
     // Match all API routes (and Sanctum cookie endpoint if you use it).
-    'paths' => [],
+    'paths' => ['api/*', 'sanctum/csrf-cookie'],
 
     // Allow all standard HTTP verbs (GET, POST, PUT, PATCH, DELETE, OPTIONS).
     'allowed_methods' => ['*'],
