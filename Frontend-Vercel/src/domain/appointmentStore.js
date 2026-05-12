@@ -73,7 +73,6 @@ const request = async (path = '', options = {}) => {
         headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
-            '
             ...(options.headers || {}),
         },
         body: options.body,
