@@ -73,10 +73,23 @@ const request = async (path = '', options = {}) => {
         headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
+            'ngrok-skip-browser-warning': 'true', // <-- AICI ESTE PERMISUL VIP PENTRU NGROK
             ...(options.headers || {}),
         },
         body: options.body,
     });
+
+    const payload = await safeJson(response);
+
+    if (!response.ok) {
+        const error = new Error('API request failed');
+        error.status = response.status;
+        error.payload = payload;
+        throw error;
+    }
+
+    return payload;
+};
 
     const payload = await safeJson(response);
 
