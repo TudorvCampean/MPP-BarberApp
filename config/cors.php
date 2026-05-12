@@ -33,10 +33,7 @@ return [
     // For a tighter setup, set CORS_ALLOWED_ORIGINS=http://192.168.x.y:5173
     // in your .env file and the exact VM origin will be whitelisted.
     // -----------------------------------------------------------------------
-    'allowed_origins' => array_map(
-        'trim',
-        explode(',', env('CORS_ALLOWED_ORIGINS', '*'))
-    ),
+    'allowed_origins' => ['*'],
 
     // Leave patterns empty — we use the explicit list above.
     'allowed_origins_patterns' => [],
@@ -51,6 +48,6 @@ return [
     'max_age' => 0,
 
     // Set to true only when using cookies / Sanctum SPA authentication.
-    'supports_credentials' => false,
+    'supports_credentials' => true,
 
 ];

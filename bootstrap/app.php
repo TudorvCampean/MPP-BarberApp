@@ -12,7 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->prepend(\App\Http\Middleware\ForceApiCors::class);
+       // $middleware->prepend(\App\Http\Middleware\ForceApiCors::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
