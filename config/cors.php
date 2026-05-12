@@ -48,6 +48,6 @@ return [
     'max_age' => 0,
 
     // Set to true only when using cookies / Sanctum SPA authentication.
-    'supports_credentials' => true,
+    'supports_credentials' => false,
 
 ];
