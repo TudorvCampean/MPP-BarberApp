@@ -1,34 +1,33 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
+import basicSsl from '@vitejs/plugin-basic-ssl'; // Importă plugin-ul
 import { fileURLToPath } from 'url';
 import path from 'path';
-import basicSsl from '@vitejs/plugin-basic-ssl';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default defineConfig({
-    plugins: [vue()],
+    plugins: [
+        vue(),
+        basicSsl() // Generează automat certificatul TLS pentru localhost
+    ],
     server: {
-        host: true,
+        host: true, // Permite accesul de pe IP-uri externe (ca 10.0.2.15)
         port: 5173,
-        https: true, // Activează HTTPS pentru frontend
+        https: true, // Activează protocolul securizat
         proxy: {
             '/api': {
-                target: 'https://mpp-barberapp.test', // URL-ul securizat de Herd
+                target: 'https://mpp-barberapp.test', // Trimite cererile către Herd
                 changeOrigin: true,
-                secure: false // Permite certificatele auto-semnate generate de Herd
+                secure: false // Ignoră eroarea de certificat auto-semnat al lui Herd
             }
         }
     },
     test: {
         globals: true,
-        environment: 'jsdom', // Necesar pentru a simula browserul (localStorage, DOM)
-        exclude: [
-            '**/node_modules/**',
-            '**/tests/e2e/**', // Exclude testele Playwright pentru a nu rula în Vitest
-            '**/dist/**'
-        ],
+        environment: 'jsdom',
+        exclude: ['**/node_modules/**', '**/tests/e2e/**', '**/dist/**'],
     },
     resolve: {
         alias: {
@@ -37,7 +36,6 @@ export default defineConfig({
         },
     },
     css: {
-        // Asigură-te că fișierul postcss.config.js este în rădăcina proiectului
-        postcss: __dirname,
+        postcss: path.resolve(__dirname),
     },
 });
