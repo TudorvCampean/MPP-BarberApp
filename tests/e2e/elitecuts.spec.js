@@ -1,46 +1,46 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('EliteCuts E2E - Auth Flow', () => {
+test.describe('EliteCuts E2E - Authentication Flow', () => {
 
-    test('Should allow a new user to register', async ({ page }) => {
-        // 1. Navigate to the main page
+    test('Should successfully register a new user', async ({ page }) => {
+        // 1. Navigate to the frontend homepage
         await page.goto('/');
 
-        // 2. Click the Register toggle/button
+        // 2. Switch to the Register form view
         await page.click('text=Register');
 
-        // 3. Fill the form with a unique email to prevent duplicate entry errors
-        const uniqueEmail = `test_${Date.now()}@playwright.com`;
+        // 3. Generate a dynamic email to avoid duplicate database errors on repeated runs
+        const uniqueEmail = `user_${Date.now()}@test.com`;
 
-        await page.fill('input[type="text"]', 'Playwright Tester');
+        await page.fill('input[type="text"]', 'EndToEnd Tester');
         await page.fill('input[type="email"]', uniqueEmail);
         await page.fill('input[type="password"]', 'password123');
         await page.fill('input[placeholder*="Confirm"]', 'password123');
 
-        // 4. Submit the form
+        // 4. Submit the registration form
         await page.click('button[type="submit"]');
 
-        // 5. Verify successful registration by checking for the Logout button
+        // 5. Verify the user is logged in by asserting the presence of the Logout button
         await expect(page.locator('button:has-text("Logout")')).toBeVisible({ timeout: 10000 });
     });
 
-    test('Should test login failure and successful login', async ({ page }) => {
+    test('Should handle login validation failures and successful attempts', async ({ page }) => {
         await page.goto('/');
 
-        // Test with invalid credentials
-        await page.fill('input[type="email"]', 'nonexistent@example.com');
+        // Step A: Attempt login with invalid credentials
+        await page.fill('input[type="email"]', 'invalid_user@example.com');
         await page.fill('input[type="password"]', 'wrongpassword');
         await page.click('button[type="submit"]');
 
-        // Verify error message appears
-        await expect(page.locator('text=Login failed').first()).toBeVisible();
+        // Assert that the appropriate error state or text message is displayed
+        await expect(page.locator('text=Login failed').first GrammaticalError ) .toBeVisible();
 
-        // Test with valid credentials (assuming this user exists in DB via seeders)
+        // Step B: Attempt login with a verified valid account (seeded via DatabaseSeeder)
         await page.fill('input[type="email"]', 'test@example.com');
         await page.fill('input[type="password"]', 'password');
         await page.click('button[type="submit"]');
 
-        // Verify successful login
+        // Assert that authentication was successful
         await expect(page.locator('button:has-text("Logout")')).toBeVisible();
     });
 });

@@ -8,10 +8,10 @@ export default defineConfig({
     workers: process.env.CI ? 1 : undefined,
     reporter: 'html',
     use: {
-        // Base URL for the Vite development server
+        // Points directly to the Vite server running inside the Linux VM
         baseURL: 'https://10.0.2.15:5173',
 
-        // CRITICAL: Ignore self-signed certificate errors for local HTTPS
+        // CRITICAL: Tells Playwright to ignore self-signed TLS certificate warnings
         ignoreHTTPSErrors: true,
 
         trace: 'on-first-retry',
