@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
-import basicSsl from '@vitejs/plugin-basic-ssl'; // Importă plugin-ul
+import basicSsl from '@vitejs/plugin-basic-ssl'; 
 import { fileURLToPath } from 'url';
 import path from 'path';
 
@@ -10,24 +10,25 @@ const __dirname = path.dirname(__filename);
 export default defineConfig({
     plugins: [
         vue(),
-        basicSsl() // Generează automat certificatul TLS pentru localhost
+        basicSsl() // Generates the self-signed TLS certificate for localhost
     ],
     server: {
-        host: true, // Permite accesul de pe IP-uri externe (ca 10.0.2.15)
+        host: true, // Allows external IP access (like 10.0.2.15)
         port: 5173,
-        https: true, // Activează protocolul securizat
+        https: true, // Forces HTTPS
         proxy: {
             '/api': {
-                // Ne conectăm simplu și direct la portul deschis de Artisan
-                target: 'http://10.0.2.2:8000',
+                // Connect directly to the Artisan server running on the Windows host
+                target: 'http://10.0.2.2:8000', 
                 changeOrigin: true,
-                secure: false
+                secure: false // Ignores SSL validation for this internal proxy connection
             }
         }
     },
     test: {
         globals: true,
-        environment: 'jsdom',
+        // CRITICAL FIX: Changed from 'jsdom' to 'happy-dom' to avoid ESM require errors
+        environment: 'happy-dom', 
         exclude: ['**/node_modules/**', '**/tests/e2e/**', '**/dist/**'],
     },
     resolve: {
