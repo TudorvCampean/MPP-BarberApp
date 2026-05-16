@@ -9,7 +9,7 @@ export default defineConfig({
     reporter: 'html',
     use: {
         // Base URL for the Vite development server
-        baseURL: 'https://localhost:5173',
+        baseURL: 'https://10.0.2.15:5173',
 
         // CRITICAL: Ignore self-signed certificate errors for local HTTPS
         ignoreHTTPSErrors: true,
