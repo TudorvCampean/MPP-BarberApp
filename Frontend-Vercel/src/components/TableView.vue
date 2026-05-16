@@ -396,6 +396,8 @@
                                    data-testid="appointment-client-name"
                                    class="w-full bg-slate-950/50 border border-slate-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 rounded-xl py-3 pl-10 pr-4 text-white outline-none transition-all placeholder:text-slate-600 shadow-inner" />
                         </div>
+
+                        <p v-if="formErrors.clientName" class="mt-1 text-xs text-red-500 font-semibold">{{ formErrors.clientName }}</p>
                     </div>
 
                     <div>
