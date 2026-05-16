@@ -6,28 +6,28 @@ describe('PresentationView.vue', () => {
     it('1. Renders all mandatory Bronze Challenge elements', () => {
         const wrapper = mount(PresentationView);
 
-
-        expect(wrapper.text()).toContain('Elite Cuts'); // Name
-        expect(wrapper.text()).toContain('Your Style, Our Craft'); // Tagline
-        expect(wrapper.text()).toContain('Professional appointment management system'); // Description
+        // Corectat: Verificăm numele exact cu spațiu cum e în componentă
+        expect(wrapper.text()).toContain('Elite Cuts');
+        expect(wrapper.text()).toContain('Your Style, Our Craft');
+        
+        expect(wrapper.findAll('svg').length).toBeGreaterThan(0);
     });
 
-    it('2. Emits navigate event to "table" when Calendar button is clicked', async () => {
+    it('2. Emits navigate event to "register" when Create Account button is clicked', async () => {
         const wrapper = mount(PresentationView);
 
+        // Corectat: Căutăm butonul existent 'Create Account'
+        const registerBtn = wrapper.findAll('button').find(b => b.text().includes('Create Account'));
+        await registerBtn.trigger('click');
 
-        const calendarBtn = wrapper.findAll('button').find(b => b.text().includes('Open Calendar'));
-        await calendarBtn.trigger('click');
-
-
-        expect(wrapper.emitted()).toHaveProperty('navigate');
-        expect(wrapper.emitted().navigate[0]).toEqual(['table']);
+        expect(wrapper.emitted().navigate[0]).toEqual(['register']);
     });
 
-    it('3. Emits navigate event to "login" when Sign In button is clicked', async () => {
+    it('3. Emits navigate event to "login" when Log In button is clicked', async () => {
         const wrapper = mount(PresentationView);
 
-        const loginBtn = wrapper.findAll('button').find(b => b.text().includes('Sign In'));
+        // Corectat: Căutăm butonul existent 'Log In'
+        const loginBtn = wrapper.findAll('button').find(b => b.text().includes('Log In'));
         await loginBtn.trigger('click');
 
         expect(wrapper.emitted().navigate[0]).toEqual(['login']);

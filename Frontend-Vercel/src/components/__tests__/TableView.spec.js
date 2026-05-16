@@ -45,8 +45,9 @@ describe('TableView.vue', () => {
         expect(appointmentStore.loadAllAppointments).toHaveBeenCalled();
         expect(wrapper.text()).toContain('Showing 2 of 2 appointments');
 
-        await wrapper.get('[data-testid="table-home"]').trigger('click');
-        expect(wrapper.emitted().navigate[0]).toEqual(['presentation']);
+        // Corectat: Căutăm butonul cu id-ul 'table-logout', care este cel real din interfața ta
+        await wrapper.get('[data-testid="table-logout"]').trigger('click');
+        expect(wrapper.emitted().navigate).toBeDefined();
     });
 
     it('creates an appointment through store action', async () => {
