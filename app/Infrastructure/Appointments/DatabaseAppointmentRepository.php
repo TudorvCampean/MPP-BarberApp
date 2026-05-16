@@ -30,8 +30,14 @@ class DatabaseAppointmentRepository implements AppointmentRepositoryInterface
      */
     public function all(): array
     {
-        return Appointment::with('client')
-            ->get()
+        $query = Appointment::with('client');
+
+        // Dacă utilizatorul logat NU este admin, îi arătăm doar programările lui
+        if (auth()->check() && auth()->user()->role !== 'admin') {
+            $query->where('user_id', auth()->id());
+        }
+
+        return $query->get()
             ->map(fn (Appointment $a) => $this->toArray($a))
             ->values()
             ->all();
@@ -46,7 +52,17 @@ class DatabaseAppointmentRepository implements AppointmentRepositoryInterface
     {
         $appointment = Appointment::with('client')->find($id);
 
-        return $appointment ? $this->toArray($appointment) : null;
+        // 1. Mai întâi verificăm dacă există
+        if (!$appointment) {
+            return null;
+        }
+
+        // 2. Apoi verificăm autorizarea
+        if (auth()->user()->role !== 'admin' && $appointment->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        return $this->toArray($appointment);
     }
 
     /**
@@ -64,6 +80,7 @@ class DatabaseAppointmentRepository implements AppointmentRepositoryInterface
         $client = Client::firstOrCreate(['name' => (string) $attributes['client_name']]);
 
         $appointment = Appointment::create([
+            'user_id'   => auth()->id(),
             'client_id' => $client->id,
             'date'      => (string) $attributes['date'],
             'time'      => (string) $attributes['time'],
@@ -94,6 +111,11 @@ class DatabaseAppointmentRepository implements AppointmentRepositoryInterface
             return null;
         }
 
+        if (auth()->user()->role !== 'admin' && $appointment->user_id !== auth()->id()) {
+            // Nu îi aparține și nu e admin
+            abort(403, 'Unauthorized action.');
+        }
+
         // Re-associate the client only when the caller provides a new name.
         if (array_key_exists('client_name', $attributes)) {
             $client = Client::firstOrCreate(['name' => (string) $attributes['client_name']]);
@@ -121,7 +143,17 @@ class DatabaseAppointmentRepository implements AppointmentRepositoryInterface
      */
     public function delete(int $id): bool
     {
-        return (bool) Appointment::destroy($id);
+        $appointment = Appointment::find($id);
+
+        if (!$appointment) {
+            return false;
+        }
+
+        if (auth()->user()->role !== 'admin' && $appointment->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        return (bool) $appointment->delete();
     }
 
     /**

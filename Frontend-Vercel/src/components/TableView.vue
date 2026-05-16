@@ -4,9 +4,8 @@
 
             <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div class="flex items-center gap-4">
-                    <button @click="goHome" data-testid="table-home" class="text-slate-400 hover:text-amber-500 transition-colors bg-slate-800 p-2 rounded-full border border-slate-700 hover:border-amber-500/50">
-                        <Home class="w-5 h-5" />
-                    </button>
+                    <button @click="handleLogout" data-testid="table-logout" class="text-slate-400 hover:text-red-500 transition-colors bg-slate-800 p-2 rounded-full border border-slate-700 hover:border-red-500/50" title="Log Out">
+                    <LogOut class="w-5 h-5" /> </button>
                     <div class="flex items-center gap-3">
                         <div class="bg-slate-800/50 rounded-xl p-3 border border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)]">
                             <Scissors class="w-6 h-6 text-amber-500" />
@@ -531,7 +530,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { Home, Scissors, BarChart3, Calendar as CalendarIcon, LayoutGrid, Table as TableIcon, Plus, Eye, Pencil, Trash2, X, Clock, ChevronLeft, ChevronRight, Search, CheckCircle, Check, Users, ChevronDown, Banknote, Undo } from 'lucide-vue-next';
+import { LogOut, Scissors, BarChart3, Calendar as CalendarIcon, LayoutGrid, Table as TableIcon, Plus, Eye, Pencil, Trash2, X, Clock, ChevronLeft, ChevronRight, Search, CheckCircle, Check, Users, ChevronDown, Banknote, Undo } from 'lucide-vue-next';
 import {
     appointments,
     addAppointment,
@@ -539,6 +538,7 @@ import {
     deleteAppointmentById,
     loadAllAppointments,
 } from '../domain/appointmentStore';
+import { logout } from '../domain/authStore';
 import { validateAppointment } from '../domain/appointmentModel';
 import { readBrowserState, recordBrowserEvent } from '../domain/browserState';
 
@@ -568,11 +568,10 @@ const form = ref({ id: null, clientName: '', date: '', hour: 8, minute: 0, statu
 const formErrors = ref({});
 const showInsights = ref(false);
 
-const goHome = () => {
-    recordBrowserEvent('navigate', 'presentation');
-    emit('navigate', 'presentation');
+const handleLogout = () => {
+    appointments.value = []; // Curățăm RAM-ul imediat
+    logout(); // Funcția de logout va șterge token-ul și va reîncărca pagina spre root (/)
 };
-
 const goToStatistics = () => {
     recordBrowserEvent('navigate', 'statistics');
     emit('navigate', 'statistics');

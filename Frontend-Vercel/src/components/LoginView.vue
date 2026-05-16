@@ -59,19 +59,6 @@
                     </div>
                 </form>
 
-                <div class="my-6 flex items-center">
-                    <div class="flex-1 h-px bg-slate-700"></div>
-                    <span class="px-4 text-slate-500 text-sm">or</span>
-                    <div class="flex-1 h-px bg-slate-700"></div>
-                </div>
-
-                <button
-                    type="button"
-                    @click="$emit('navigate', 'table')"
-                    class="w-full border border-slate-700 text-slate-300 hover:bg-slate-700 py-3 rounded-md text-sm font-medium"
-                >
-                    Continue as Guest
-                </button>
             </div>
         </div>
     </div>

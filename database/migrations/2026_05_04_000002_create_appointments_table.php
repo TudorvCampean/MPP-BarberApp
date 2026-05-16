@@ -29,18 +29,24 @@ return new class extends Migration
         Schema::create('appointments', function (Blueprint $table): void {
             $table->id();
 
+            // Adăugăm relația cu utilizatorul care creează programarea
+            $table->foreignId('user_id')
+                ->constrained('users')
+                ->cascadeOnDelete();
+
             $table->foreignId('client_id')
                 ->constrained('clients')
                 ->cascadeOnDelete();
 
             $table->date('date');
             $table->time('time');
-            $table->string('status', 20); // upcoming | completed | cancelled
+            $table->string('status', 20);
             $table->decimal('income', 10, 2)->nullable();
             $table->timestamps();
 
-            // Guarantees no double-booking at the database level.
-            $table->unique(['date', 'time']);
+            // Modificăm cheia unică ca să permită doi frizeri diferiți
+            // să aibă programări în același timp
+            $table->unique(['user_id', 'date', 'time']);
         });
     }
 

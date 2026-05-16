@@ -12,10 +12,11 @@ Route::post('/register', [AuthController::class, 'register']);
 // 2. Rute PROTEJATE (Doar utilizatorii cu token valid au acces)
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
+
     Route::prefix('appointments')->group(function (): void {
         Route::get('/', [AppointmentController::class, 'index']);
         Route::post('/', [AppointmentController::class, 'store']);
-        Route::get('/statistics', [AppointmentController::class, 'statistics']);
+        Route::get('/statistics', [AppointmentController::class, 'statistics']); // Aceasta e suficientă
         Route::get('/{id}', [AppointmentController::class, 'show'])->whereNumber('id');
         Route::put('/{id}', [AppointmentController::class, 'update'])->whereNumber('id');
         Route::patch('/{id}', [AppointmentController::class, 'update'])->whereNumber('id');

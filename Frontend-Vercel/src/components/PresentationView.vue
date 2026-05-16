@@ -29,21 +29,20 @@
 
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
                     <button
-                        @click="goToCalendar"
-                        data-testid="presentation-open-calendar"
-                        class="inline-flex items-center justify-center bg-amber-500 hover:bg-amber-600 text-slate-900 px-8 py-6 text-lg font-semibold rounded-lg shadow-lg hover:shadow-amber-500/50 transition-all duration-300"
+                        @click="$emit('navigate', 'login')"
+                        data-testid="presentation-sign-in"
+                        class="inline-flex items-center justify-center bg-amber-500 hover:bg-amber-600 text-slate-900 px-8 py-4 text-lg font-semibold rounded-lg transition-all duration-300 shadow-lg shadow-amber-500/20"
                     >
-                        Open Calendar
-                        <ArrowRight class="ml-2 w-5 h-5" />
+                        <LogIn class="mr-2 w-5 h-5" />
+                        Log In
                     </button>
 
                     <button
-                        @click="goToLogin"
-                        data-testid="presentation-sign-in"
-                        class="inline-flex items-center justify-center border border-slate-700 text-slate-300 hover:bg-slate-800 px-8 py-6 text-lg font-semibold rounded-lg transition-all duration-300"
+                        @click="$emit('navigate', 'register')"
+                        data-testid="presentation-register"
+                        class="inline-flex items-center justify-center border border-slate-700 text-slate-300 hover:bg-slate-800 px-8 py-4 text-lg font-semibold rounded-lg transition-all duration-300"
                     >
-                        <LogIn class="mr-2 w-5 h-5" />
-                        Sign In
+                        Create Account
                     </button>
                 </div>
             </div>
@@ -56,18 +55,9 @@
 </template>
 
 <script setup>
-import { Scissors, ArrowRight, LogIn } from 'lucide-vue-next';
-
+import { Scissors, LogIn } from 'lucide-vue-next';
 
 const emit = defineEmits(['navigate']);
-
-const goToCalendar = () => {
-    emit('navigate', 'table');
-};
-
-const goToLogin = () => {
-    emit('navigate', 'login');
-};
 </script>
 
 <style scoped>
