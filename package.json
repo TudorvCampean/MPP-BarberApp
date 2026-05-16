@@ -11,8 +11,8 @@
         "coverage": "vitest run --coverage"
     },
     "devDependencies": {
+        "@playwright/test": "^1.60.0",
         "@tailwindcss/vite": "^4.0.0",
-        "@playwright/test": "^1.54.2",
         "@vitest/coverage-v8": "^4.1.0",
         "@vue/test-utils": "^2.4.6",
         "autoprefixer": "^10.4.27",
