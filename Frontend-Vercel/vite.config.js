@@ -18,9 +18,13 @@ export default defineConfig({
         https: true, // Activează protocolul securizat
         proxy: {
             '/api': {
-                target: 'https://MPP-BarberApp.test', // Trimite cererile către Herd
+                target: 'https://10.0.2.2', // Trimite cererile către Herd
                 changeOrigin: true,
-                secure: false // Ignoră eroarea de certificat auto-semnat al lui Herd
+                secure: false, // Ignoră eroarea de certificat auto-semnat al lui Herd
+                headers: {
+                    // Dar îi spunem lui Herd ce site vrem să accesăm
+                    Host: 'MPP-BarberApp.test' 
+                }
             }
         }
     },
