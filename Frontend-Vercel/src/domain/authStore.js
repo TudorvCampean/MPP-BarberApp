@@ -105,5 +105,8 @@ if (typeof window !== 'undefined') {
 export const logout = () => {
     localStorage.removeItem('auth_token');
     currentUser.value = null;
-    window.location.href = '/login';
+
+    // Ștergem și starea browserului
+    document.cookie = "elitecuts_browser_state=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    window.location.href = '/';
 };

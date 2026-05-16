@@ -76,10 +76,14 @@ const request = async (path = '', options = {}) => {
     });
 
     // 3. Gestionarea Sesiunii (Inactivitate/Expirare Token)
-    if (response.status === 401) {
+    iif (response.status === 401) {
         localStorage.removeItem('auth_token');
-        // Redirecționare la login dacă token-ul nu mai e valid
-        window.location.href = '/login';
+
+        // NOU: Ștergem cookie-ul de stare ca să nu mai forțeze încărcarea tabelului
+        document.cookie = "elitecuts_browser_state=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+        // Mergem pe root, MainApp va decide ce să afișeze (implicit Presentation/Login)
+        window.location.href = '/';
         throw new Error('Session expired');
     }
 
