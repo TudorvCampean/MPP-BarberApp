@@ -11,14 +11,21 @@ export default defineConfig({
     server: {
         host: true,
         port: 5173,
+        https: true, // Activează HTTPS pentru frontend
+        proxy: {
+            '/api': {
+                target: 'https://mpp-barberapp.test', // URL-ul securizat de Herd
+                changeOrigin: true,
+                secure: false // Permite certificatele auto-semnate generate de Herd
+            }
+        }
     },
-    // ADAUGĂ ACEASTĂ SECȚIUNE
     test: {
         globals: true,
-        environment: 'jsdom', // Rezolvă eroarea de localStorage
+        environment: 'jsdom', // Necesar pentru a simula browserul (localStorage, DOM)
         exclude: [
             '**/node_modules/**',
-            '**/tests/e2e/**', // Exclude testele Playwright din Vitest
+            '**/tests/e2e/**', // Exclude testele Playwright pentru a nu rula în Vitest
             '**/dist/**'
         ],
     },
@@ -29,6 +36,7 @@ export default defineConfig({
         },
     },
     css: {
+        // Asigură-te că fișierul postcss.config.js este în rădăcina proiectului
         postcss: __dirname,
     },
 });

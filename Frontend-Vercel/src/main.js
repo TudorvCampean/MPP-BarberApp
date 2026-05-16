@@ -9,7 +9,7 @@ import axios from 'axios';
 // ---------------------------------------------------------------------------
 // Am pus adresa IP direct aici pentru a ignora orice cache de .env
 // ---------------------------------------------------------------------------
-const apiBase = 'http://192.168.56.1:8080'; 
+const __API_BASE__ = 'https://mpp-barberapp.test/api';
 
 axios.defaults.baseURL = apiBase;
 
