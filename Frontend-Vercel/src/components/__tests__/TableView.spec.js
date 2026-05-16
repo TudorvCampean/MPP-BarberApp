@@ -2,10 +2,17 @@ import { mount } from '@vue/test-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import TableView from '../TableView.vue';
 import * as appointmentStore from '../../domain/appointmentStore';
+import * as authStore from '../../domain/authStore';
 
+// 1. Facem mock pentru store-ul de autentificare
+vi.mock('../../domain/authStore', () => ({
+    logout: vi.fn(),
+    currentUser: { value: { name: 'Barber Admin' } }
+}));
+
+// 2. Facem mock pentru store-ul de programări
 vi.mock('../../domain/appointmentStore', async () => {
     const { ref } = await import('vue');
-
     return {
         appointments: ref([]),
         loadAllAppointments: vi.fn(),
@@ -22,6 +29,8 @@ const baseData = [
 
 describe('TableView.vue', () => {
     beforeEach(() => {
+        vi.clearAllMocks();
+        
         appointmentStore.appointments.value = JSON.parse(JSON.stringify(baseData));
         appointmentStore.loadAllAppointments.mockResolvedValue(true);
 
@@ -38,16 +47,18 @@ describe('TableView.vue', () => {
         });
     });
 
-    it('loads appointments and emits navigation to home', async () => {
+    it('loads appointments and calls authStore.logout() on exit', async () => {
         const wrapper = mount(TableView);
         await wrapper.vm.$nextTick();
 
         expect(appointmentStore.loadAllAppointments).toHaveBeenCalled();
         expect(wrapper.text()).toContain('Showing 2 of 2 appointments');
 
-        // Corectat: Căutăm butonul cu id-ul 'table-logout', care este cel real din interfața ta
+        // Apăsăm butonul de logout
         await wrapper.get('[data-testid="table-logout"]').trigger('click');
-        expect(wrapper.emitted().navigate).toBeDefined();
+        
+        // Acum verificăm corect dacă s-a declanșat funcția din store
+        expect(authStore.logout).toHaveBeenCalled();
     });
 
     it('creates an appointment through store action', async () => {
