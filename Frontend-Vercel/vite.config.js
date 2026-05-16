@@ -18,13 +18,10 @@ export default defineConfig({
         https: true, // Activează protocolul securizat
         proxy: {
             '/api': {
-                target: 'https://10.0.2.2', // Trimite cererile către Herd
+                // Ne conectăm simplu și direct la portul deschis de Artisan
+                target: 'http://10.0.2.2:8000',
                 changeOrigin: true,
-                secure: false, // Ignoră eroarea de certificat auto-semnat al lui Herd
-                headers: {
-                    // Dar îi spunem lui Herd ce site vrem să accesăm
-                    Host: 'MPP-BarberApp.test' 
-                }
+                secure: false
             }
         }
     },
