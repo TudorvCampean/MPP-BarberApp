@@ -137,8 +137,15 @@ class AppointmentService implements AppointmentServiceInterface
 
     private function guardDateTimeSlotConflict(string $date, string $time, ?int $ignoreId = null): void
     {
+        $currentUserId = auth()->id(); // Aflăm cine face cererea
+
         foreach ($this->repository->all() as $appointment) {
             if ($ignoreId !== null && $appointment['id'] === $ignoreId) {
+                continue;
+            }
+
+            // NOU: Ignorăm conflictul dacă programarea aparține altui coleg
+            if (isset($appointment['user_id']) && $appointment['user_id'] !== $currentUserId) {
                 continue;
             }
 

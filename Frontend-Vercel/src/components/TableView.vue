@@ -618,17 +618,6 @@ const saveApt = async () => {
         return;
     }
 
-    const overlappingApt = appointments.value.find(apt => {
-        if (apt.date !== form.value.date) return false;
-        if (apt.id === form.value.id) return false;
-        return apt.time === form.value.time;
-    });
-
-    if (overlappingApt) {
-        formErrors.value.time = `This exact time (${overlappingApt.time}) is already booked. Please select a different time.`;
-        return;
-    }
-
     const result = form.value.id
         ? await updateAppointment(form.value)
         : await addAppointment(form.value);

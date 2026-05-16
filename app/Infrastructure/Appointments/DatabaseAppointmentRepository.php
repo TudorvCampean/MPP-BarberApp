@@ -184,6 +184,7 @@ class DatabaseAppointmentRepository implements AppointmentRepositoryInterface
     {
         return [
             'id'          => $appointment->id,
+            'user_id'     => $appointment->user_id,
             'client_name' => $appointment->client->name,
             'date'        => $appointment->date,
             'time'        => $appointment->time,
