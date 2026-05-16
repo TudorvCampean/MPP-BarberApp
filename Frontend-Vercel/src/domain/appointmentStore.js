@@ -1,5 +1,6 @@
 import { ref } from 'vue';
 import { validateAppointment } from './appointmentModel';
+import { clearBrowserState } from './browserState';
 
 const getApiBase = () => {
     if (typeof window !== 'undefined' && window.__API_BASE__) {
@@ -79,8 +80,8 @@ const request = async (path = '', options = {}) => {
     if (response.status === 401) {
         localStorage.removeItem('auth_token');
 
-        // NOU: Ștergem cookie-ul de stare ca să nu mai forțeze încărcarea tabelului
-        document.cookie = "elitecuts_browser_state=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        // Folosim funcția nativă care știe numele corect al cookie-ului
+        clearBrowserState();
 
         // Mergem pe root, MainApp va decide ce să afișeze (implicit Presentation/Login)
         window.location.href = '/';

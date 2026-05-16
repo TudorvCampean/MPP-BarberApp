@@ -1,4 +1,5 @@
 import { ref } from 'vue';
+import { clearBrowserState } from './browserState';
 
 export const currentUser = ref(null);
 export const authError = ref(null);
@@ -106,7 +107,8 @@ export const logout = () => {
     localStorage.removeItem('auth_token');
     currentUser.value = null;
 
-    // Ștergem și starea browserului
-    document.cookie = "elitecuts_browser_state=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    // Folosim funcția nativă care știe numele corect al cookie-ului
+    clearBrowserState();
+
     window.location.href = '/';
 };
