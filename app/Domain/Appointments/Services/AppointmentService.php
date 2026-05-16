@@ -36,7 +36,8 @@ class AppointmentService implements AppointmentServiceInterface
 
     public function create(array $payload): array
     {
-        $this->guardDateTimeSlotConflict($payload['date'], $payload['time']);
+        // Trimitem auth()->id() ca target pentru a verifica conflictele pe persoana care creează
+        $this->guardDateTimeSlotConflict($payload['date'], $payload['time'], null, auth()->id());
 
         return $this->repository->create($payload);
     }
@@ -56,7 +57,11 @@ class AppointmentService implements AppointmentServiceInterface
 
         $date = $payload['date'] ?? $existing['date'];
         $time = $payload['time'] ?? $existing['time'];
-        $this->guardDateTimeSlotConflict($date, $time, $id);
+
+        // Când adminul editează programarea altcuiva, verificăm conflictul pe calendarul acelui coleg!
+        $targetUserId = $existing['user_id'] ?? auth()->id();
+
+        $this->guardDateTimeSlotConflict($date, $time, $id, $targetUserId);
 
         return $this->repository->update($id, $payload);
     }
@@ -135,21 +140,25 @@ class AppointmentService implements AppointmentServiceInterface
         }));
     }
 
-    private function guardDateTimeSlotConflict(string $date, string $time, ?int $ignoreId = null): void
+    private function guardDateTimeSlotConflict(string $date, string $time, ?int $ignoreId = null, ?int $targetUserId = null): void
     {
-        $currentUserId = auth()->id(); // Aflăm cine face cererea
+        $targetUserId = $targetUserId ?? auth()->id();
 
         foreach ($this->repository->all() as $appointment) {
             if ($ignoreId !== null && $appointment['id'] === $ignoreId) {
                 continue;
             }
 
-            // NOU: Ignorăm conflictul dacă programarea aparține altui coleg
-            if (isset($appointment['user_id']) && $appointment['user_id'] !== $currentUserId) {
+            // REPARAT: Folosim cast-ul (int) pentru ca SQLite returnează ID-urile ca string-uri!
+            if (isset($appointment['user_id']) && (int) $appointment['user_id'] !== (int) $targetUserId) {
                 continue;
             }
 
-            if ($appointment['date'] === $date && $appointment['time'] === $time) {
+            // REPARAT: Baza de date salvează ora ca 10:00:00. Noi trimitem 10:00. Comparăm doar primele 5 caractere!
+            $dbTime = substr($appointment['time'], 0, 5);
+            $reqTime = substr($time, 0, 5);
+
+            if ($appointment['date'] === $date && $dbTime === $reqTime) {
                 throw ValidationException::withMessages([
                     'time' => ['The selected time slot is already booked for this date.'],
                 ]);
@@ -157,4 +166,3 @@ class AppointmentService implements AppointmentServiceInterface
         }
     }
 }
-
