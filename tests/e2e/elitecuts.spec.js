@@ -1,46 +1,65 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('EliteCuts E2E - Authentication Flow', () => {
+test.describe('EliteCuts E2E - Complete Auth Flow', () => {
+    
+    // Generăm un email unic la fiecare rulare a testului pentru a evita erorile de "email deja folosit"
+    const uniqueEmail = `tester_${Date.now()}@playwright.com`;
+    const testPassword = 'StrongPassword123!';
 
-    test('Should successfully register a new user', async ({ page }) => {
-        // 1. Navigate to the frontend homepage
+    test('Should successfully register, logout, and login', async ({ page }) => {
+        // ==========================================
+        // 1. REGISTER FLOW
+        // ==========================================
         await page.goto('/');
+        
+        // Folosim ID-ul exact din componenta PresentationView.vue
+        await page.click('[data-testid="presentation-register"]');
 
-        // 2. Switch to the Register form view
-        await page.click('text=Register');
-
-        // 3. Generate a dynamic email to avoid duplicate database errors on repeated runs
-        const uniqueEmail = `user_${Date.now()}@test.com`;
-
-        await page.fill('input[type="text"]', 'EndToEnd Tester');
+        // Completăm formularul
+        await page.fill('input[type="text"]', 'E2E Tester');
         await page.fill('input[type="email"]', uniqueEmail);
-        await page.fill('input[type="password"]', 'password123');
-        await page.fill('input[placeholder*="Confirm"]', 'password123');
 
-        // 4. Submit the registration form
+        // Deoarece avem două input-uri de parolă (Password și Confirm), le luăm pe amândouă
+        const passwordInputs = page.locator('input[type="password"]');
+        await passwordInputs.nth(0).fill(testPassword);
+        await passwordInputs.nth(1).fill(testPassword);
+
         await page.click('button[type="submit"]');
 
-        // 5. Verify the user is logged in by asserting the presence of the Logout button
-        await expect(page.locator('button:has-text("Logout")')).toBeVisible({ timeout: 10000 });
-    });
+        // Verificăm succesul: a intrat în aplicație și vede butonul de Logout
+        const logoutBtn = page.locator('[data-testid="table-logout"]');
+        await expect(logoutBtn).toBeVisible({ timeout: 10000 });
 
-    test('Should handle login validation failures and successful attempts', async ({ page }) => {
-        await page.goto('/');
 
-        // Step A: Attempt login with invalid credentials
-        await page.fill('input[type="email"]', 'invalid_user@example.com');
-        await page.fill('input[type="password"]', 'wrongpassword');
+        // ==========================================
+        // 2. LOGOUT FLOW
+        // ==========================================
+        await logoutBtn.click();
+
+        // Verificăm că a fost aruncat înapoi la pagina de prezentare
+        const loginBtn = page.locator('[data-testid="presentation-sign-in"]');
+        await expect(loginBtn).toBeVisible();
+
+
+        // ==========================================
+        // 3. LOGIN FLOW (Fail + Success)
+        // ==========================================
+        await loginBtn.click();
+
+        // A. Logare cu credențiale greșite
+        await page.fill('input[type="email"]', uniqueEmail);
+        await page.fill('input[type="password"]', 'wrong_pass_here');
         await page.click('button[type="submit"]');
 
-        // Assert that the appropriate error state or text message is displayed
-        await expect(page.locator('text=Login failed').first GrammaticalError ) .toBeVisible();
+        // Așteptăm să apară o eroare roșie în UI (clasa Tailwind pt text de eroare)
+        await expect(page.locator('.text-red-500, .text-red-400')).toBeVisible();
 
-        // Step B: Attempt login with a verified valid account (seeded via DatabaseSeeder)
-        await page.fill('input[type="email"]', 'test@example.com');
-        await page.fill('input[type="password"]', 'password');
+        // B. Logare cu credențiale corecte
+        // Curățăm câmpul de parolă (îl selectăm, ștergem și scriem parola bună)
+        await page.fill('input[type="password"]', testPassword);
         await page.click('button[type="submit"]');
 
-        // Assert that authentication was successful
-        await expect(page.locator('button:has-text("Logout")')).toBeVisible();
+        // Verificăm că a reintrat în cont cu succes
+        await expect(page.locator('[data-testid="table-logout"]')).toBeVisible({ timeout: 10000 });
     });
 });
