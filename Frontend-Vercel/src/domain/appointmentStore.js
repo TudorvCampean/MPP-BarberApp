@@ -76,7 +76,7 @@ const request = async (path = '', options = {}) => {
     });
 
     // 3. Gestionarea Sesiunii (Inactivitate/Expirare Token)
-    iif (response.status === 401) {
+    if (response.status === 401) {
         localStorage.removeItem('auth_token');
 
         // NOU: Ștergem cookie-ul de stare ca să nu mai forțeze încărcarea tabelului
