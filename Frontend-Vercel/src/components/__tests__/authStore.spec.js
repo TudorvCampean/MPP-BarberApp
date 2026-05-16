@@ -1,46 +1,68 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { login, logout, authError } from '../../domain/authStore';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { login, register, logout, currentUser, authError, isLoading } from '../../domain/authStore';
 
-describe('authStore', () => {
+// Mock the global fetch function
+global.fetch = vi.fn();
+
+describe('Auth Store Tests (Vue)', () => {
     beforeEach(() => {
-        // Curățăm mediul înainte de fiecare test
-        localStorage.clear();
         vi.clearAllMocks();
+        localStorage.clear();
+        currentUser.value = null;
         authError.value = null;
+        isLoading.value = false;
     });
 
-    it('saves the token to localStorage on successful login', async () => {
-        // Simulăm un răspuns de succes de la serverul LAN
-        global.fetch = vi.fn().mockResolvedValue({
+    it('login() should send correct payload to relative route /api/login', async () => {
+        const mockUser = { id: 1, name: 'Test User' };
+        const mockToken = 'fake-jwt-token';
+
+        // Simulate a successful server response
+        global.fetch.mockResolvedValueOnce({
             ok: true,
-            json: () => Promise.resolve({
-                access_token: 'fake-token-123',
-                user: { name: 'Tudor' }
+            json: async () => ({ user: mockUser, access_token: mockToken }),
+        });
+
+        const result = await login('test@example.com', 'password123');
+
+        // Verify that the request was sent correctly to the Vite proxy
+        expect(global.fetch).toHaveBeenCalledWith(
+            expect.stringContaining('/api/login'),
+            expect.objectContaining({
+                method: 'POST',
+                body: JSON.stringify({ email: 'test@example.com', password: 'password123' })
             })
-        });
+        );
 
-        const success = await login('test@test.ro', 'password');
-
-        expect(success).toBe(true);
-        expect(localStorage.getItem('auth_token')).toBe('fake-token-123');
+        expect(result).toBe(true);
+        expect(localStorage.getItem('auth_token')).toBe(mockToken);
+        expect(currentUser.value).toEqual(mockUser);
     });
 
-    it('sets an error message when login fails', async () => {
-        // Simulăm o eroare de autentificare (ex: date greșite)
-        global.fetch = vi.fn().mockResolvedValue({
+    it('login() should populate authError if the server returns an error', async () => {
+        global.fetch.mockResolvedValueOnce({
             ok: false,
-            json: () => Promise.resolve({ message: 'Invalid credentials' })
+            json: async () => ({ message: 'Invalid credentials' }),
         });
 
-        const success = await login('wrong@test.ro', 'wrong');
+        const result = await login('wrong@example.com', 'wrongpass');
 
-        expect(success).toBe(false);
+        expect(result).toBe(false);
         expect(authError.value).toBe('Invalid credentials');
+        expect(currentUser.value).toBeNull();
     });
 
-    it('removes the token from storage on logout', () => {
-        localStorage.setItem('auth_token', 'active-token');
-        logout(); // Gestionarea sesiunii cerută de Assignment 4
+    it('logout() should remove the token from localStorage', () => {
+        localStorage.setItem('auth_token', 'existing-token');
+        currentUser.value = { name: 'Test User' };
+
+        // Since logout performs a redirect, we prevent jsdom errors by mocking window.location
+        delete window.location;
+        window.location = { href: '' };
+
+        logout();
+
         expect(localStorage.getItem('auth_token')).toBeNull();
+        expect(currentUser.value).toBeNull();
     });
 });

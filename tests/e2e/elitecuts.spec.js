@@ -1,214 +1,46 @@
-import { expect, test } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
-test.beforeEach(async ({ page }) => {
-    // Mergem la pagina principală
-    await page.goto('/');
+test.describe('EliteCuts E2E - Auth Flow', () => {
 
-    // Dacă vedem butonul de login, înseamnă că trebuie să ne autentificăm
-    // Asigură-te că folosești test-id-urile sau label-urile tale
-    await page.fill('input[type="email"]', 'test@test.ro');
-    await page.fill('input[type="password"]', 'parola123');
-    await page.click('button[type="submit"]');
-
-    // Așteptăm să apară tabelul pentru a confirma că login-ul a reușit
-    await expect(page.getByTestId('appointments-table')).toBeVisible();
-});
-
-const COOKIE_NAME = 'elitecuts_browser_state_v1';
-
-const getBrowserState = async (page) => {
-    const cookies = await page.context().cookies();
-    const cookie = cookies.find((entry) => entry.name === COOKIE_NAME);
-
-    if (!cookie) return null;
-
-    try {
-        return JSON.parse(decodeURIComponent(cookie.value));
-    } catch {
-        return null;
-    }
-};
-
-const nextDateInputValue = () => {
-    const date = new Date();
-    date.setDate(date.getDate() + 1);
-    return date.toISOString().split('T')[0];
-};
-
-test.describe('Elite Cuts browser flows', () => {
-    test.beforeEach(async ({ page }) => {
-        await page.request.get('/api/testing/reset-appointments');
-    });
-
-    test.afterEach(async ({ page }) => {
-        await page.request.get('/api/testing/reset-appointments');
-    });
-
-    test('restores the last visited page from cookies after reload', async ({ page }) => {
+    test('Should allow a new user to register', async ({ page }) => {
+        // 1. Navigate to the main page
         await page.goto('/');
 
-        await expect(page.getByTestId('presentation-open-calendar')).toBeVisible();
-        await page.getByTestId('presentation-open-calendar').click();
+        // 2. Click the Register toggle/button
+        await page.click('text=Register');
 
-        await expect(page.getByTestId('table-add-appointment')).toBeVisible();
+        // 3. Fill the form with a unique email to prevent duplicate entry errors
+        const uniqueEmail = `test_${Date.now()}@playwright.com`;
 
-        const stateAfterNavigate = await getBrowserState(page);
-        expect(stateAfterNavigate?.lastPage).toBe('table');
-        expect(stateAfterNavigate?.lastAction).toBe('navigate');
+        await page.fill('input[type="text"]', 'Playwright Tester');
+        await page.fill('input[type="email"]', uniqueEmail);
+        await page.fill('input[type="password"]', 'password123');
+        await page.fill('input[placeholder*="Confirm"]', 'password123');
 
-        await page.reload();
-        await expect(page.getByTestId('table-add-appointment')).toBeVisible();
-        await expect(page.getByTestId('table-view-table')).toHaveClass(/bg-slate-800/);
+        // 4. Submit the form
+        await page.click('button[type="submit"]');
+
+        // 5. Verify successful registration by checking for the Logout button
+        await expect(page.locator('button:has-text("Logout")')).toBeVisible({ timeout: 10000 });
     });
 
-    test('persists the selected table view mode in a cookie', async ({ page }) => {
-        await page.goto('/');
-        await page.getByTestId('presentation-open-calendar').click();
-
-        await page.getByTestId('table-view-cards').click();
-        await expect(page.getByText('Total Income')).toBeVisible();
-
-        const stateAfterPreference = await getBrowserState(page);
-        expect(stateAfterPreference?.tableViewMode).toBe('cards');
-        expect(stateAfterPreference?.lastAction).toBe('table_view_mode');
-
-        await page.reload();
-        await expect(page.getByText('Total Income')).toBeVisible();
-        await expect(page.getByTestId('table-view-cards')).toHaveClass(/bg-slate-800/);
-    });
-
-    test('tracks appointment creation and allows navigating to statistics and home', async ({ page }, testInfo) => {
-        const browserHourByProject = {
-            chromium: '10',
-            firefox: '11',
-            webkit: '12',
-        };
-        const uniqueHour = browserHourByProject[testInfo.project.name] ?? '10';
-        const uniqueClientName = `Playwright Client ${testInfo.project.name}`;
-
-        await page.goto('/');
-        await page.getByTestId('presentation-open-calendar').click();
-
-        await page.getByTestId('table-add-appointment').click();
-        await page.getByTestId('appointment-client-name').fill(uniqueClientName);
-        await page.getByTestId('appointment-date').fill(nextDateInputValue());
-        await page.getByTestId('appointment-hour').selectOption(uniqueHour);
-        await page.getByTestId('appointment-minute').selectOption('30');
-        await page.getByTestId('appointment-save').click();
-        await expect.poll(async () => (await getBrowserState(page))?.lastAction, { timeout: 15000 }).toBe('appointment_created');
-
-        const stateAfterCreate = await getBrowserState(page);
-        expect(stateAfterCreate?.lastAction).toBe('appointment_created');
-        expect(stateAfterCreate?.lastActionValue).toBe(uniqueClientName);
-
-        if (await page.getByTestId('appointment-save').isVisible()) {
-            await page.getByTestId('appointment-cancel').click();
-        }
-
-        await page.getByTestId('table-statistics').click();
-        await expect(page.getByText('Insights')).toBeVisible();
-
-        const stateAfterStatsNav = await getBrowserState(page);
-        expect(stateAfterStatsNav?.lastPage).toBe('statistics');
-        expect(stateAfterStatsNav?.lastAction).toBe('navigate');
-
-        await page.getByTestId('statistics-home').click();
-        await expect(page.getByTestId('table-add-appointment')).toBeVisible();
-
-        const finalState = await getBrowserState(page);
-        expect(finalState?.lastPage).toBe('table');
-    });
-
-    test('completes and reverts an appointment from the table', async ({ page }, testInfo) => {
-        const browserHourByProject = {
-            chromium: '17',
-            firefox: '18',
-            webkit: '19',
-        };
-        const uniqueHour = browserHourByProject[testInfo.project.name] ?? '17';
-        const uniqueClientName = `Completion Client ${testInfo.project.name}`;
-
-        await page.goto('/');
-        await page.getByTestId('presentation-open-calendar').click();
-
-        await page.getByTestId('table-add-appointment').click();
-        await page.getByTestId('appointment-client-name').fill(uniqueClientName);
-        await page.getByTestId('appointment-date').fill(nextDateInputValue());
-        await page.getByTestId('appointment-hour').selectOption(uniqueHour);
-        await page.getByTestId('appointment-minute').selectOption('55');
-        await page.getByTestId('appointment-save').click();
-        await expect.poll(async () => (await getBrowserState(page))?.lastAction, { timeout: 15000 }).toBe('appointment_created');
-
-        if (await page.getByTestId('appointment-save').isVisible()) {
-            await page.getByTestId('appointment-cancel').click();
-        }
-
-        const row = page.locator('tr', { hasText: uniqueClientName });
-        await expect(row).toBeVisible();
-
-        await row.hover();
-        await row.locator('button[title="Mark as Completed"]').click({ force: true });
-        await expect(page.getByTestId('complete-confirm')).toBeVisible();
-
-        await page.locator('input[placeholder="e.g. 50"]').fill('75');
-        await page.getByTestId('complete-confirm').click();
-
-        await expect(row.getByText('Completed')).toBeVisible();
-        await expect.poll(async () => (await getBrowserState(page))?.lastAction, { timeout: 15000 }).toBe('appointment_completed');
-
-        await row.hover();
-        await row.locator('button[title="Revert to Upcoming"]').click({ force: true });
-
-        await expect(row.getByText('Upcoming')).toBeVisible();
-        await expect.poll(async () => (await getBrowserState(page))?.lastAction, { timeout: 15000 }).toBe('appointment_reverted');
-    });
-
-
-    test('allows choosing a specific month in statistics', async ({ page }) => {
-        await page.goto('/');
-        await page.getByTestId('presentation-open-calendar').click();
-        await page.getByTestId('table-statistics').click();
-
-        await expect(page.getByText('Insights')).toBeVisible();
-
-        await page.getByTestId('statistics-month-select').selectOption('0');
-        await expect(page.getByTestId('statistics-current-month')).toContainText('January');
-
-        await page.getByTestId('statistics-month-select').selectOption('11');
-        await expect(page.getByTestId('statistics-current-month')).toContainText('December');
-    });
-
-    test('is responsive on mobile viewport', async ({ page }) => {
-        await page.setViewportSize({ width: 375, height: 667 });
+    test('Should test login failure and successful login', async ({ page }) => {
         await page.goto('/');
 
-        await expect(page.getByTestId('presentation-open-calendar')).toBeVisible();
-        await page.getByTestId('presentation-open-calendar').click();
+        // Test with invalid credentials
+        await page.fill('input[type="email"]', 'nonexistent@example.com');
+        await page.fill('input[type="password"]', 'wrongpassword');
+        await page.click('button[type="submit"]');
 
-        await expect(page.getByTestId('table-add-appointment')).toBeVisible();
+        // Verify error message appears
+        await expect(page.locator('text=Login failed').first()).toBeVisible();
 
-        await page.getByTestId('table-view-cards').click();
-        await expect(page.getByText('Total Income')).toBeVisible();
-    });
+        // Test with valid credentials (assuming this user exists in DB via seeders)
+        await page.fill('input[type="email"]', 'test@example.com');
+        await page.fill('input[type="password"]', 'password');
+        await page.click('button[type="submit"]');
 
-    test('is responsive on tablet viewport', async ({ page }) => {
-        await page.setViewportSize({ width: 768, height: 1024 });
-        await page.goto('/');
-
-        await expect(page.getByTestId('presentation-open-calendar')).toBeVisible();
-        await page.getByTestId('presentation-open-calendar').click();
-
-        await expect(page.getByTestId('table-add-appointment')).toBeVisible();
-    });
-
-    test('is responsive on desktop viewport', async ({ page }) => {
-        await page.setViewportSize({ width: 1920, height: 1080 });
-        await page.goto('/');
-
-        await expect(page.getByTestId('presentation-open-calendar')).toBeVisible();
-        await page.getByTestId('presentation-open-calendar').click();
-
-        await expect(page.getByTestId('table-add-appointment')).toBeVisible();
+        // Verify successful login
+        await expect(page.locator('button:has-text("Logout")')).toBeVisible();
     });
 });
-

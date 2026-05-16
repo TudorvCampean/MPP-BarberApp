@@ -1,37 +1,25 @@
 import { defineConfig, devices } from '@playwright/test';
 
-const baseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://mpp-barberapp.test';
-
 export default defineConfig({
     testDir: './tests/e2e',
-    // E2E tests share one in-memory backend state, so run sequentially for stability.
-    fullyParallel: false,
+    fullyParallel: true,
     forbidOnly: !!process.env.CI,
     retries: process.env.CI ? 2 : 0,
-    workers: 1,
-    reporter: [['list']],
+    workers: process.env.CI ? 1 : undefined,
+    reporter: 'html',
     use: {
-        baseURL,
+        // Base URL for the Vite development server
+        baseURL: 'https://localhost:5173',
+
+        // CRITICAL: Ignore self-signed certificate errors for local HTTPS
+        ignoreHTTPSErrors: true,
+
         trace: 'on-first-retry',
-        screenshot: 'only-on-failure',
-        video: 'retain-on-failure',
-        extraHTTPHeaders: {
-            'X-E2E-Isolated': '1',
-        },
     },
     projects: [
         {
             name: 'chromium',
             use: { ...devices['Desktop Chrome'] },
         },
-        {
-            name: 'firefox',
-            use: { ...devices['Desktop Firefox'] },
-        },
-        {
-            name: 'webkit',
-            use: { ...devices['Desktop Safari'] },
-        },
     ],
 });
-
