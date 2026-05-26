@@ -78,8 +78,8 @@
                                 </div>
                             </div>
 
-                            <div class="rounded-xl border border-slate-800 bg-slate-900/50 overflow-hidden">
-                                <table class="w-full text-sm text-left">
+                            <div class="rounded-xl border border-slate-800 bg-slate-900/50 overflow-hidden overflow-x-auto">
+                                <table class="w-full min-w-[800px] text-sm text-left">
                                     <thead class="bg-slate-950/80 text-slate-400 border-b border-slate-800">
                                     <tr>
                                         <th class="px-6 py-4 font-medium uppercase tracking-wider text-xs">Client Name</th>
@@ -159,7 +159,7 @@
 
                         <div v-if="viewMode === 'cards'" class="animate-in fade-in duration-500">
 
-                            <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                                 <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-5 flex items-center gap-4 shadow-sm hover:border-emerald-500/30 transition-colors">
                                     <div class="bg-emerald-500/10 p-3 rounded-lg border border-emerald-500/20"><Banknote class="w-6 h-6 text-emerald-500"/></div>
                                     <div>
@@ -185,9 +185,9 @@
                                 <div v-for="apt in completedAppointmentsList" :key="apt.id" class="bg-slate-800/30 border border-emerald-500/20 hover:border-emerald-500/50 rounded-xl p-5 transition-all group relative overflow-hidden">
                                     <div class="absolute top-0 right-0 w-16 h-16 bg-emerald-500/5 rounded-bl-full -z-10 group-hover:bg-emerald-500/10 transition-colors"></div>
 
-                                    <div class="flex justify-between items-start mb-4">
-                                        <div>
-                                            <h3 class="text-lg font-semibold text-emerald-400 transition-colors">{{ apt.clientName }}</h3>
+                                    <div class="flex justify-between items-start gap-2 mb-4">
+                                        <div class="flex-1 min-w-0">
+                                            <h3 class="text-lg font-semibold text-emerald-400 transition-colors break-words">{{ apt.clientName }}</h3>
                                             <span class="text-xs bg-slate-900 text-slate-300 px-2 py-1 rounded border border-slate-700 mt-2 inline-flex items-center gap-1">
                                                 <Banknote class="w-3 h-3 text-emerald-500"/> Income: {{ apt.income }} RON
                                             </span>
