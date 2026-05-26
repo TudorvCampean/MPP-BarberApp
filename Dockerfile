@@ -1,5 +1,5 @@
 # Imaginea de bază oficială de PHP
-FROM php:8.2-cli
+FROM php:8.4-cli
 
 # Instalăm dependențele necesare pentru Laravel și PostgreSQL
 RUN apt-get update -y && apt-get install -y \
