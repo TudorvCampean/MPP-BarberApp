@@ -20,4 +20,4 @@ ENV PORT=8000
 EXPOSE 8000
 
 # Comanda de start
-CMD php artisan serve --host=0.0.0.0 --port=$PORT
+CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT
