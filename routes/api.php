@@ -32,30 +32,3 @@ if (app()->environment(['local', 'testing'])) {
         return response()->json(['ok' => true]);
     });
 }
-
-Route::get('/make-me-admin', function () {
-    // ⚠️ ÎNLOCUIEȘTE AICI CU EMAIL-UL EXACT PE CARE L-AI ÎNREGISTRAT PE SITE
-    $email = 'campeantudor5@gmail.com';
-
-    $user = \App\Models\User::where('email', $email)->first();
-
-    if (!$user) {
-        return response()->json([
-            'status' => 'eroare',
-            'mesaj' => "Utilizatorul cu email-ul '$email' NU exista in baza de date din cloud! Asigura-te ca te-ai inregistrat mai intai pe site."
-        ]);
-    }
-
-    $user->role = 'admin';
-    $user->save();
-
-    return response()->json([
-        'status' => 'succes',
-        'mesaj' => "Utilizatorul '$email' a fost transformat in ADMIN cu succes!",
-        'date_utilizator' => [
-            'name' => $user->name,
-            'email' => $user->email,
-            'role' => $user->role
-        ]
-    ]);
-});
