@@ -28,15 +28,15 @@
 
                     <div :class="showInsights ? 'lg:w-2/3' : 'w-full'" class="transition-all duration-500">
 
-                        <div class="flex items-center justify-center mb-8">
-                            <div class="bg-slate-950/50 rounded-xl p-1.5 border border-slate-800/60 inline-flex shadow-inner">
-                                <button @click="setViewMode('calendar'); selectedTimelineDate = null" data-testid="table-view-calendar" :class="['px-6 py-2.5 rounded-lg font-medium text-sm transition-all duration-300 flex items-center gap-2', viewMode === 'calendar' ? 'bg-slate-800 text-amber-500 shadow-md border border-slate-700/50' : 'text-slate-400 hover:text-white']">
+                        <div class="flex items-center justify-center mb-8 w-full">
+                            <div class="bg-slate-950/50 rounded-xl p-1.5 border border-slate-800/60 flex flex-col sm:flex-row w-full sm:w-auto gap-1 shadow-inner">
+                                <button @click="setViewMode('calendar'); selectedTimelineDate = null" data-testid="table-view-calendar" :class="['px-4 sm:px-6 py-2.5 rounded-lg font-medium text-sm transition-all duration-300 flex items-center justify-center gap-2 w-full sm:w-auto', viewMode === 'calendar' ? 'bg-slate-800 text-amber-500 shadow-md border border-slate-700/50' : 'text-slate-400 hover:text-white']">
                                     <CalendarIcon class="w-4 h-4" /> Calendar
                                 </button>
-                                <button @click="setViewMode('cards')" data-testid="table-view-cards" :class="['px-6 py-2.5 rounded-lg font-medium text-sm transition-all duration-300 flex items-center gap-2', viewMode === 'cards' ? 'bg-slate-800 text-amber-500 shadow-md border border-slate-700/50' : 'text-slate-400 hover:text-white']">
+                                <button @click="setViewMode('cards')" data-testid="table-view-cards" :class="['px-4 sm:px-6 py-2.5 rounded-lg font-medium text-sm transition-all duration-300 flex items-center justify-center gap-2 w-full sm:w-auto', viewMode === 'cards' ? 'bg-slate-800 text-amber-500 shadow-md border border-slate-700/50' : 'text-slate-400 hover:text-white']">
                                     <LayoutGrid class="w-4 h-4" /> History
                                 </button>
-                                <button @click="setViewMode('table')" data-testid="table-view-table" :class="['px-6 py-2.5 rounded-lg font-medium text-sm transition-all duration-300 flex items-center gap-2', viewMode === 'table' ? 'bg-slate-800 text-amber-500 shadow-md border border-slate-700/50' : 'text-slate-400 hover:text-white']">
+                                <button @click="setViewMode('table')" data-testid="table-view-table" :class="['px-4 sm:px-6 py-2.5 rounded-lg font-medium text-sm transition-all duration-300 flex items-center justify-center gap-2 w-full sm:w-auto', viewMode === 'table' ? 'bg-slate-800 text-amber-500 shadow-md border border-slate-700/50' : 'text-slate-400 hover:text-white']">
                                     <TableIcon class="w-4 h-4" /> Table
                                 </button>
                             </div>
@@ -145,14 +145,22 @@
                                 </table>
                             </div>
 
-                            <div class="flex items-center justify-between px-2 mt-6">
-                                <p class="text-sm text-slate-400">
+                            <div class="flex flex-col md:flex-row items-center justify-between gap-4 px-2 mt-6">
+                                <p class="text-sm text-slate-400 text-center md:text-left w-full md:w-auto">
                                     Showing <span class="font-medium text-slate-200">{{ paginatedAppointments.length }}</span> of <span class="font-medium text-slate-200">{{ appointments.length }}</span> appointments
                                 </p>
-                                <div class="flex items-center gap-2">
-                                    <button @click="currentPage--" :disabled="currentPage === 1" class="px-3 py-2 rounded-lg border border-slate-700 text-sm font-medium text-slate-300 hover:bg-slate-800 disabled:opacity-40 transition-colors flex items-center gap-1"><ChevronLeft class="w-4 h-4" /> Previous</button>
-                                    <div class="flex items-center gap-1 px-2 text-sm font-medium text-slate-400">Page <span class="text-white">{{ currentPage }}</span> of {{ totalPages }}</div>
-                                    <button @click="currentPage++" :disabled="currentPage === totalPages" class="px-3 py-2 rounded-lg border border-slate-700 text-sm font-medium text-slate-300 hover:bg-slate-800 disabled:opacity-40 transition-colors flex items-center gap-1">Next <ChevronRight class="w-4 h-4" /></button>
+                                <div class="flex flex-wrap items-center justify-center gap-2 w-full md:w-auto">
+                                    <button @click="currentPage--" :disabled="currentPage === 1" class="px-3 py-2 rounded-lg border border-slate-700 text-sm font-medium text-slate-300 hover:bg-slate-800 disabled:opacity-40 transition-colors flex items-center gap-1">
+                                        <ChevronLeft class="w-4 h-4" /> <span class="hidden sm:inline">Previous</span>
+                                    </button>
+
+                                    <div class="flex items-center gap-1 px-2 text-sm font-medium text-slate-400">
+                                        Page <span class="text-white">{{ currentPage }}</span> of {{ totalPages }}
+                                    </div>
+
+                                    <button @click="currentPage++" :disabled="currentPage === totalPages" class="px-3 py-2 rounded-lg border border-slate-700 text-sm font-medium text-slate-300 hover:bg-slate-800 disabled:opacity-40 transition-colors flex items-center gap-1">
+                                        <span class="hidden sm:inline">Next</span> <ChevronRight class="w-4 h-4" />
+                                    </button>
                                 </div>
                             </div>
                         </div>
