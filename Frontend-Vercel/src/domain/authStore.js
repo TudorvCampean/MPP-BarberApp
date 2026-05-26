@@ -112,3 +112,29 @@ export const logout = () => {
 
     window.location.href = '/';
 };
+
+/**
+ * Verifică dacă utilizatorul are un token salvat și reface sesiunea la refresh
+ */
+export const restoreSession = async () => {
+    const token = localStorage.getItem('auth_token');
+
+    // Dacă nu avem token în storage, nu facem nimic
+    if (!token) {
+        currentUser.value = null;
+        return false;
+    }
+
+    try {
+        // Opțional: Aici poți face un request către backend (ex: /api/user)
+        // pentru a aduce datele proaspete ale user-ului (nume, rol).
+        // Pentru moment, doar refacem starea locală pentru a-l lăsa în aplicație:
+
+        currentUser.value = { isRestored: true }; // Simulează că e logat
+        return true;
+    } catch (error) {
+        // Dacă token-ul a expirat sau e invalid, curățăm tot
+        logout();
+        return false;
+    }
+};

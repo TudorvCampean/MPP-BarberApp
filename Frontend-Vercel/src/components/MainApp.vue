@@ -14,8 +14,9 @@ import PresentationView from './PresentationView.vue';
 import LoginView from './LoginView.vue';
 import TableView from './TableView.vue';
 import StatisticsView from './StatisticsView.vue';
-import RegisterView from './RegisterView.vue'; // Asigură-te că ai acest import
+import RegisterView from './RegisterView.vue';
 import { readBrowserState, recordBrowserEvent } from '../domain/browserState';
+import { restoreSession } from '../domain/authStore';
 
 const allowedPages = ['presentation', 'login', 'table', 'statistics', 'register'];
 const normalizePage = (pageName) => (allowedPages.includes(pageName) ? pageName : 'presentation');
@@ -28,13 +29,13 @@ const goTo = (pageName) => {
     browserState.value = recordBrowserEvent('navigate', currentPage.value);
 };
 
-const formatAction = (action, value) => {
-    if (!action) return 'No activity recorded yet.';
-    const formattedValue = value ? `: ${value}` : '';
-    return `${action.replaceAll('_', ' ')}${formattedValue}`;
-};
+onMounted(async () => {
+    // Încearcă să refacă sesiunea la deschiderea/refresh-ul aplicației
+    const isLoggedIn = await restoreSession();
 
-onMounted(() => {
-    browserState.value = recordBrowserEvent('app_open', currentPage.value);
+    // Dacă e logat, interzicem accesul la paginile publice (login, register, presentation)
+    if (isLoggedIn && ['login', 'presentation', 'register'].includes(currentPage.value)) {
+        goTo('table');
+    }
 });
 </script>
