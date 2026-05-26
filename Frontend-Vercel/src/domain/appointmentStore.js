@@ -3,11 +3,9 @@ import { validateAppointment } from './appointmentModel';
 import { clearBrowserState } from './browserState';
 
 const getApiBase = () => {
-    if (typeof window !== 'undefined' && window.__API_BASE__) {
-        const origin = String(window.__API_BASE__).replace(/\/$/, '');
-        return `${origin}/api/appointments`;
-    }
-    return '/api/appointments';
+    // Preia link-ul Backend-ului de pe Vercel. Dacă ești local, folosește '' pentru proxy.
+    const origin = import.meta.env.VITE_API_BASE_URL || '';
+    return `${origin}/api/appointments`;
 };
 const DEFAULT_PER_PAGE = 100;
 

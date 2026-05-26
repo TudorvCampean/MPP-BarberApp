@@ -6,8 +6,8 @@ export const authError = ref(null);
 export const isLoading = ref(false);
 
 const getAuthApiBase = () => {
-    // Folosește baza setată în main.js
-    const origin = String(window.__API_BASE__ || '').replace(/\/$/, '');
+    // Preia link-ul Backend-ului de pe Vercel, altfel folosește proxy-ul local ('')
+    const origin = import.meta.env.VITE_API_BASE_URL || '';
     return `${origin}/api`;
 };
 
