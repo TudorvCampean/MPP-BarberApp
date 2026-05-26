@@ -34,6 +34,6 @@ if (app()->environment(['local', 'testing'])) {
 }
 
 Route::get('/make-me-admin', function () {
-    \App\Models\User::where('email', 'adresa_ta_de_email@aici.com')->update(['role' => 'admin']);
+    \App\Models\User::where('email', 'campeantudor5@gmail.com')->update(['role' => 'admin']);
     return 'Cont actualizat la admin cu succes!';
 });
