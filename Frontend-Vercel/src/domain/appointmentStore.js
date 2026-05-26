@@ -13,14 +13,20 @@ export const appointments = ref([]);
 export const isLoadingAppointments = ref(false);
 export const appointmentsError = ref(null);
 
-const mapFromApi = (appointment) => ({
-    id: appointment.id,
-    clientName: appointment.client_name,
-    date: appointment.date,
-    time: appointment.time,
-    status: appointment.status,
-    income: appointment.income,
-});
+const mapFromApi = (appointment) => {
+    // Tăiem secundele returnate de PostgreSQL (ex: "14:30:00" devine "14:30")
+    // Extragem doar primele 5 caractere.
+    const formattedTime = appointment.time ? appointment.time.substring(0, 5) : '';
+
+    return {
+        id: appointment.id,
+        clientName: appointment.client_name,
+        date: appointment.date,
+        time: formattedTime,
+        status: appointment.status,
+        income: appointment.income,
+    };
+};
 
 const mapToApi = (appointment) => ({
     client_name: appointment.clientName,
